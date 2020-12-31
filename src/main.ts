@@ -1,4 +1,5 @@
 import Range = GoogleAppsScript.Spreadsheet.Range;
+import Sheet = GoogleAppsScript.Spreadsheet.Sheet;
 
 type Content = {
   userId: number;
@@ -8,20 +9,23 @@ type Content = {
 };
 
 const main = () => {
-  const content = getContent();
-  Logger.log(content.id);
-  Logger.log(content.userId);
-  Logger.log(content.title);
-  Logger.log(content.body);
-
   const sheet = SpreadsheetApp.getActiveSheet();
   const range = sheet.getRange(3, 2, 4);
   const total = pipe(range, arrayFromRange, sum);
   Logger.log(`total: ${total}`);
+
+  const { id, userId, title, body } = getContentById(1);
+  sheet.getRange("A105:B109").setValues([
+    ["id", id],
+    ["userId", userId],
+    ["title", title],
+    ["body", body],
+    ["total", total],
+  ]);
 };
 
-const getContent = (): Content => {
-  const contentAsString = UrlFetchApp.fetch("https://jsonplaceholder.typicode.com/posts/1", {
+const getContentById = (id: number): Content => {
+  const contentAsString = UrlFetchApp.fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
     method: "get",
   }).getContentText();
   return JsonConverter.toJson(contentAsString);
